@@ -11,9 +11,10 @@ javascript:
         const workTitle = document.getElementById("workTitle-title").getAttribute("title");
         const episodeTitle = document.getElementById("contentMainHeader-pageTitle-episodeTitle").innerText;
         const url = document.location.href.replace("/my/", "/");
+        const episodeNumber = document.getElementById("workTitle-episodeNumber").innerText.replace(/[^\d]/g, "");
 
         const postMain = `「${workTitle}」<br>${episodeTitle}<br><br><br>` + 
-        `#narou #小説家になろう https://ncode.syosetu.com/xxxx<br>` + 
+        `#narou #小説家になろう https://ncode.syosetu.com/xxxx  /${episodeNumber}<br>` + 
         `#kakuyomu #カクヨム ${url}`;
         const post = RESULT_HTML_TEMPLATE.replace("xxxx", postMain);
 
@@ -27,4 +28,4 @@ javascript:
 })();
 
 // https://crocro.com/tools/item/gen_bookmarklet/
-// javascript:!function(){const e='<div style="border:1px solid black;">xxxx</div>',t=`「${document.getElementById("workTitle-title").getAttribute("title")}」<br>${document.getElementById("contentMainHeader-pageTitle-episodeTitle").innerText}<br><br><br>#narou #小説家になろう https://ncode.syosetu.com/xxxx<br>#kakuyomu #カクヨム ${document.location.href.replace("/my/","/")}`,n=e.replace("xxxx",t);let o=document.createElement("div");o.innerHTML=n,document.querySelector("#contentAside-inner").appendChild(o)}();void(0);
+// javascript:!function(){const e='<div style="border:1px solid black;">xxxx</div>',t=document.getElementById("workTitle-title").getAttribute("title"),n=document.getElementById("contentMainHeader-pageTitle-episodeTitle").innerText,o=document.location.href.replace("/my/","/"),r=`「${t}」<br>${n}<br><br><br>#narou #小説家になろう https://ncode.syosetu.com/xxxx  /${document.getElementById("workTitle-episodeNumber").innerText.replace(/[^\d]/g,"")}<br>#kakuyomu #カクヨム ${o}%60,d=e.replace("xxxx",r);let i=document.createElement("div");i.innerHTML=d,document.querySelector("#contentAside-inner").appendChild(i)}();void(0);
