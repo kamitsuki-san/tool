@@ -10,17 +10,24 @@ javascript:
     
         let chapterElement = null;
         let episodes = [];
+        let episodesInChapter = [];
+        let sumAll = 0;
+        // 全文字数
+        const charAll = parseInt(document.querySelector("#summary-workInfo-characterCount-all").innerText.replace(/[^\d]/g, ""), 10);
         // 「章とエピソード」の各行に対して実行
         document.querySelectorAll(".isShown .episode, .isShown .chapter").forEach((element) => {
             if (element.classList.contains('chapter')) {
                 // 章にあたった時点で、合計情報をリセット
                 chapterElement = element;
                 episodes = [];
+                episodesInChapter.push(episodes);
                 return;
             }
             // 以下、エピソードの行に対して処理
-            episodes.push(parseInt(element.querySelector(".episode-characterCount").innerText.replace(/[^\d]/g, ""), 10));
+            const epiNum = parseInt(element.querySelector(".episode-characterCount").innerText.replace(/[^\d]/g, ""), 10);
+            episodes.push(epiNum);
             const sum = episodes.reduce((a, b) => a + b, 0);
+            sumAll += epiNum;
             const avg = parseInt(sum/episodes.length,10);
             const l = __rmvHazureVal(episodes);
             const avg2 = parseInt(l.reduce((a, b) => a + b, 0) / l.length, 10);
@@ -28,6 +35,10 @@ javascript:
             chapterElement.querySelector(SUM_IN_CHAPTER).innerText=  `合計${sum}`;
             chapterElement.querySelector(AVG_IN_CHAPTER).innerText = `平均${avg}`;
             chapterElement.querySelector(AVG2_IN_CHAPTER).innerText = `外れ値除外平均${avg2}`;
+            // 各エピソード行に設定
+            const percent = (sumAll/charAll);
+            element.style.backgroundColor = `rgb(255, 0, 0, ${percent})`;
+            element.querySelector(`.episode-feedback-cheerComment`).innerText = `${sumAll}(${(percent*100).toFixed(1)}%)`;
         });
     
         // 以下は、集計、検討用にコンソールに出力するための処理
@@ -41,6 +52,15 @@ javascript:
             allSum += sum;
         });
         log = ("全合計" + allSum + "\n") + log;
+        // 各行
+        log += "各行\n";
+        let sum = 0;
+        episodesInChapter.forEach((episodes, chapter) => {
+            episodes.forEach((epiCharNum, epiNum) => {
+                sum += epiCharNum;
+                log += `${chapter+1}\t${epiNum+1}\t${epiCharNum}\t${sum}\n`;
+            });
+        });
         console.log(log);
     };
     /** 引数の配列から、外れ値を除外した配列を返す */
@@ -56,4 +76,4 @@ javascript:
 })();
 
 // https://crocro.com/tools/item/gen_bookmarklet/
-// javascript:!function(){const e="td:nth-child(5)",t="td:nth-child(6)",r="td:last-child";let n=null,c=[];document.querySelectorAll(".isShown .episode, .isShown .chapter").forEach((l=>{if(l.classList.contains("chapter"))return n=l,void(c=[]);c.push(parseInt(l.querySelector(".episode-characterCount").innerText.replace(/[^\d]/g,""),10));const o=c.reduce(((e,t)=>e+t),0),s=parseInt(o/c.length,10),a=(h=(h=c).sort()).slice(parseInt(h.length/3,10),-parseInt(h.length/3,10)),i=parseInt(a.reduce(((e,t)=>e+t),0)/a.length,10);var h;n.querySelector(e).innerText=`合計${o}`,n.querySelector(t).innerText=`平均${s}`,n.querySelector(r).innerText=`外れ値除外平均${i}`}));let l=0,o="";document.querySelectorAll(".isShown .chapter").forEach(((n,c)=>{const s=parseInt(n.querySelector(e).innerText.replace(/[^\d]/g,""),10),a=parseInt(n.querySelector(t).innerText.replace(/[^\d]/g,""),10),i=parseInt(n.querySelector(r).innerText.replace(/[^\d]/g,""),10);o+=`${c+1}\t${s}\t${a}\t${i}\n`,l+=s})),o="全合計"+l+"\n"+o,console.log(o)}();void(0);
+// javascript:!function(){const e="td:nth-child(5)",t="td:nth-child(6)",r="td:last-child";let n=null,c=[],o=[],l=0;const s=parseInt(document.querySelector("#summary-workInfo-characterCount-all").innerText.replace(/[^\d]/g,""),10);document.querySelectorAll(".isShown .episode, .isShown .chapter").forEach((a=>{if(a.classList.contains("chapter"))return n=a,c=[],void o.push(c);const i=parseInt(a.querySelector(".episode-characterCount").innerText.replace(/[^\d]/g,""),10);c.push(i);const u=c.reduce(((e,t)=>e+t),0);l+=i;const h=parseInt(u/c.length,10),d=(S=(S=c).sort()).slice(parseInt(S.length/3,10),-parseInt(S.length/3,10)),p=parseInt(d.reduce(((e,t)=>e+t),0)/d.length,10);var S;n.querySelector(e).innerText=`合計${u}`,n.querySelector(t).innerText=`平均${h}`,n.querySelector(r).innerText=`外れ値除外平均${p}`;const $=l/s;a.style.backgroundColor=`rgb(255, 0, 0, ${$})`,a.querySelector(".episode-feedback-cheerComment").innerText=`${l}(${(100*$).toFixed(1)}%)`}));let a=0,i="";document.querySelectorAll(".isShown .chapter").forEach(((n,c)=>{const o=parseInt(n.querySelector(e).innerText.replace(/[^\d]/g,""),10),l=parseInt(n.querySelector(t).innerText.replace(/[^\d]/g,""),10),s=parseInt(n.querySelector(r).innerText.replace(/[^\d]/g,""),10);i+=`${c+1}\t${o}\t${l}\t${s}\n`,a+=o})),i="全合計"+a+"\n"+i,i+="各行\n";let u=0;o.forEach(((e,t)=>{e.forEach(((e,r)=>{u+=e,i+=`${t+1}\t${r+1}\t${e}\t${u}\n`}))})),console.log(i)}();void(0);
