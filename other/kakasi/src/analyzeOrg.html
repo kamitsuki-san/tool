@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <style>
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      th {
+        font-weight: bold;
+        background-color: lightgreen;
+      }
+      :is(th, td):first-child {
+        font-weight: bold;
+        background-color: lightblue;
+      }
+      /* EPISODEリンクを非表示 */
+      #episode_link:not(:has(a)),
+      .episode-collapse a {
+        display: none;
+      }
+      /* テーブル全体を非表示 */
+      .table-collapse table {
+        display: none;
+      }
+      /* 10行目以降を非表示 */
+      table:has(.tr-collapse) tr:nth-child(n + 11) {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="index.html">index.html</a>
+    <div id="episode_link">
+      <h1 class="title">EPISODES LINK</h1>
+    </div>
+    <div id="word_count"></div>
+    <template id="word_count_type">
+      <div>
+        <h1 class="title"></h1>
+        <table>
+          <thead>
+            <tr class="tr-collapse">
+              <th>No</th>
+              <th>BASE</th>
+              <th>COUNT</th>
+              <th>TYPES</th>
+              <th>ORGS</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </template>
+    <template id="word_count_type_tr">
+      <tr>
+        <td class="NO"></td>
+        <td class="BASE"></td>
+        <td class="COUNT"></td>
+        <td class="TYPES"></td>
+        <td class="ORGS"></td>
+      </tr>
+    </template>
+
+    <script>
+      const EPISODES = "%EPISODES%";
+      const WORD_DATA = "%WORD_DATA%";
+
+      // 各エピソードデータへのリンク
+      for (const epi of EPISODES) {
+        const link = document.createElement("a");
+        link.href = "./" + epi;
+        link.textContent = epi;
+        // 追加
+        document.querySelector("#episode_link").appendChild(link);
+        document
+          .querySelector("#episode_link")
+          .appendChild(document.createElement("br"));
+      }
+
+      // 各種別
+      for (const type of Object.keys(WORD_DATA)) {
+        const wTemp = document
+          .querySelector("#word_count_type")
+          .content.cloneNode(true);
+        // 設定
+        wTemp.querySelector(".title").textContent = type;
+
+        // 各言語の行
+        let no = 0;
+        for (const word of WORD_DATA[type]) {
+          const wTrTemp = document
+            .querySelector("#word_count_type_tr")
+            .content.cloneNode(true);
+
+          // 設定
+          no++;
+          wTrTemp.querySelector(".NO").textContent = no;
+          wTrTemp.querySelector(".BASE").textContent = word["base"];
+          wTrTemp.querySelector(".COUNT").textContent = word["count"];
+          wTrTemp.querySelector(".TYPES").textContent = JSON.stringify(
+            word["types"]
+          );
+          wTrTemp.querySelector(".ORGS").textContent = JSON.stringify(
+            word["orgs"]
+          );
+          // 追加
+          wTemp.querySelector("tbody").appendChild(wTrTemp);
+        }
+        // 追加
+        document.querySelector("#word_count").appendChild(wTemp);
+      }
+
+      document.querySelectorAll("#episode_link .title").forEach((node) =>
+        node.addEventListener("click", (e) => {
+          const element = e.target;
+          element.parentElement.classList.toggle("episode-collapse");
+        })
+      );
+      document.querySelectorAll("#word_count .title").forEach((node) =>
+        node.addEventListener("click", (e) => {
+          const element = e.target;
+          element.parentElement.classList.toggle("table-collapse");
+        })
+      );
+      document.querySelectorAll("#word_count thead").forEach((node) =>
+        node.addEventListener("click", (e) => {
+          const element = e.target;
+          element.parentElement.classList.toggle("tr-collapse");
+        })
+      );
+    </script>
+  </body>
+</html>
