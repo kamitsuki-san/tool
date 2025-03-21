@@ -1,22 +1,29 @@
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+
     <style>
-      table,
-      th,
-      td {
-        border: 1px solid black;
+      .page-header {
+        position: sticky;
+        top: 5px;
       }
       th {
         font-weight: bold;
         background-color: lightgreen;
       }
-      :is(th, td):first-child {
-        font-weight: bold;
-        background-color: lightblue;
+      #word_count .container > div {
+        overflow-y: scroll;
+        max-height: 80vh;
       }
       /* EPISODEリンクを非表示 */
-      #episode_link:not(:has(a)),
-      .episode-collapse a {
+      #episode_link:not(:has(a)) {
         display: none;
       }
       /* テーブル全体を非表示 */
@@ -24,37 +31,66 @@
         display: none;
       }
       /* 10行目以降を非表示 */
-      table:has(.tr-collapse) tr:nth-child(n + 11) {
+      table.tr-collapse tr:nth-child(n + 11) {
         display: none;
       }
     </style>
   </head>
   <body>
-    <a href="index.html">index.html</a>
-    <div id="episode_link">
-      <h1 class="title">EPISODES LINK</h1>
+    <!-- EPISODES -->
+    <h3 class="page-header">
+      <a href="index.html">　[TOPへ]</a>
+    </h3>
+    <div id="collapse_link_parent" class="container">
+      <div id="episode_link" class="accordion-item">
+        <h1 class="title accordion-header">
+          <span
+            class="btn btn-primary"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse_link"
+            aria-expanded="false"
+            aria-controls="collapse_link"
+          >
+            EPISODES LINK
+          </span>
+        </h1>
+        <div
+          id="collapse_link"
+          class="accordion-collapse collapse"
+          data-bs-parent="#collapse_link_parent"
+        >
+          <div class="links accordion-body"></div>
+        </div>
+      </div>
     </div>
+
+    <hr />
+
+    <!-- 各集計 -->
     <div id="word_count"></div>
     <template id="word_count_type">
-      <div>
-        <h1 class="title"></h1>
-        <table>
-          <thead>
-            <tr class="tr-collapse">
-              <th>No</th>
-              <th>BASE</th>
-              <th>COUNT</th>
-              <th>TYPES</th>
-              <th>ORGS</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="container">
+        <span class="title btn btn-primary" type="button"></span>
+        <div>
+          <table class="table table-striped tr-collapse">
+            <thead>
+              <tr>
+                <th class="col">No</th>
+                <th class="col">BASE</th>
+                <th class="col">COUNT</th>
+                <th class="col">TYPES</th>
+                <th class="col">ORGS</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </template>
     <template id="word_count_type_tr">
       <tr>
-        <td class="NO"></td>
+        <td class="NO" scope="row"></td>
         <td class="BASE"></td>
         <td class="COUNT"></td>
         <td class="TYPES"></td>
@@ -62,7 +98,14 @@
       </tr>
     </template>
 
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+
     <script>
+      const DEFAULT_OPEN_TYPES = ["名詞", "接続詞"];
       const EPISODES = "%EPISODES%";
       const WORD_DATA = "%WORD_DATA%";
 
@@ -72,19 +115,27 @@
         link.href = "./" + epi;
         link.textContent = epi;
         // 追加
-        document.querySelector("#episode_link").appendChild(link);
+        document.querySelector("#episode_link .links").appendChild(link);
         document
-          .querySelector("#episode_link")
+          .querySelector("#episode_link .links")
           .appendChild(document.createElement("br"));
       }
 
       // 各種別
-      for (const type of Object.keys(WORD_DATA)) {
+      const sortFunc = (t1, t2) => {
+        // DEFAULT_OPEN_TYPES の登場の逆順（なければその後）
+        return DEFAULT_OPEN_TYPES.indexOf(t2) - DEFAULT_OPEN_TYPES.indexOf(t1);
+      };
+      for (const type of Object.keys(WORD_DATA).sort(sortFunc)) {
         const wTemp = document
           .querySelector("#word_count_type")
           .content.cloneNode(true);
         // 設定
-        wTemp.querySelector(".title").textContent = type;
+        wTemp.querySelector(".title").textContent =
+          type + `(${WORD_DATA[type].length})`;
+        if (!DEFAULT_OPEN_TYPES.includes(type)) {
+          wTemp.querySelector(".container").classList.add("table-collapse");
+        }
 
         // 各言語の行
         let no = 0;
@@ -111,22 +162,16 @@
         document.querySelector("#word_count").appendChild(wTemp);
       }
 
-      document.querySelectorAll("#episode_link .title").forEach((node) =>
-        node.addEventListener("click", (e) => {
-          const element = e.target;
-          element.parentElement.classList.toggle("episode-collapse");
-        })
-      );
       document.querySelectorAll("#word_count .title").forEach((node) =>
         node.addEventListener("click", (e) => {
-          const element = e.target;
+          const element = e.currentTarget;
           element.parentElement.classList.toggle("table-collapse");
         })
       );
-      document.querySelectorAll("#word_count thead").forEach((node) =>
+      document.querySelectorAll("#word_count table").forEach((node) =>
         node.addEventListener("click", (e) => {
-          const element = e.target;
-          element.parentElement.classList.toggle("tr-collapse");
+          const element = e.currentTarget;
+          element.classList.toggle("tr-collapse");
         })
       );
     </script>

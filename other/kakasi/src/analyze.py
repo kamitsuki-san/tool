@@ -17,16 +17,37 @@ def parse(text):
     # dict化
     ret = []
     for chunk in chunks:
-        d = chunk.split("\t")
+        # print(chunk)
+
+        # # UniDic format
+        # d = chunk.split("\t")
+        # # 各データに分解
+        # ret.append(
+        #     {
+        #         "org": d[0],
+        #         "base": re.sub("\\-.+", "", d[3]),
+        #         "type": re.sub("\\-.+", "", d[4]),
+        #         "types": d[4:7],
+        #     }
+        # )
+
+        # MeCab default format
+        d = chunk.split("\t")[1].split(",")
+        ignoresForBase = ["", "*"]
+        org = chunk.split("\t")[0]
+        base = d[6]
+        if base.strip() in ignoresForBase:
+            base = org
         # 各データに分解
         ret.append(
             {
-                "org": d[0],
-                "base": re.sub("\\-.+", "", d[3]),
-                "type": re.sub("\\-.+", "", d[4]),
-                "types": d[4:7],
+                "org": org,
+                "base": base,
+                "type": d[0],
+                "types": list(filter(lambda x: x.strip() not in ignoresForBase, d[:6])),
             }
         )
+
     return ret
 
 
@@ -129,7 +150,7 @@ for epi in dataDictPerEpisodes.keys():
 
 # まとめ
 print("★★まとめ出力")
-episodes = str([x + ".html" for x in dataDictPerEpisodes.keys()])
+episodes = str([x + ".html" for x in sorted(dataDictPerEpisodes.keys())])
 outData = {}
 for t in dataDictAll.keys():
     print("★★★ソート:" + t)
